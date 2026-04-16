@@ -2,8 +2,13 @@ const express = require('express')
 
 const router = express.Router()
 
-router.get('/', (_req, res) => {
-  res.status(200).json({ message: 'Gemini integration placeholder' })
+router.post('/', (req, res) => {
+  const { prompt } = req.body || {}
+
+  res.status(200).json({
+    status: 'Gemini route placeholder',
+    receivedPrompt: prompt || null,
+  })
 })
 
 module.exports = router

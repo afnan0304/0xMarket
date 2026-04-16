@@ -4,17 +4,20 @@ const dotenv = require('dotenv')
 const connectDB = require('./config/db')
 const healthRoute = require('./routes/health')
 const geminiRoute = require('./routes/gemini')
+const assetsRoute = require('./routes/assets')
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
 
-app.use(cors())
+app.use(cors({ origin: CLIENT_ORIGIN }))
 app.use(express.json())
 
 app.use('/api/health', healthRoute)
 app.use('/api/gemini', geminiRoute)
+app.use('/api/assets', assetsRoute)
 
 connectDB()
   .then(() => {
