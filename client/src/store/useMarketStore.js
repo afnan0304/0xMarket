@@ -1,12 +1,98 @@
 import { create } from 'zustand'
 
-const mockAssets = [
-  { id: 1, name: 'Zero-Day Exploit Pack', price: '7.40 BTC' },
-  { id: 2, name: 'Stealth VPN Tunnel', price: '2.15 BTC' },
-  { id: 3, name: 'Quantum Ledger Key', price: '12.90 BTC' },
-  { id: 4, name: 'Encrypted Data Vault', price: '5.05 BTC' },
-]
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const ASSETS_ENDPOINT = import.meta.env.VITE_ASSETS_ENDPOINT || 'http://localhost:5000/api/assets'
 
-export const useMarketStore = create(() => ({
-  assets: mockAssets,
+const buildUrl = (path) => `${API_BASE_URL}${path}`
+
+export const useMarketStore = create((set, get) => ({
+  assets: [],
+  assetsLoading: false,
+  assetsError: null,
+  health: null,
+  healthLoading: false,
+  healthError: null,
+  prompt: '',
+  geminiResult: null,
+  geminiLoading: false,
+  geminiError: null,
+
+  setPrompt: (prompt) => set({ prompt }),
+
+  fetchAssets: async () => {
+    set({ assetsLoading: true, assetsError: null })
+
+    try {
+      const response = await fetch(ASSETS_ENDPOINT)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Asset fetch failed')
+      }
+
+      set({
+        assets: Array.isArray(data?.assets) ? data.assets : [],
+        assetsLoading: false,
+      })
+    } catch (error) {
+      set({
+        assetsLoading: false,
+        assetsError: error.message || 'Unable to reach /api/assets',
+      })
+    }
+  },
+
+  fetchHealth: async () => {
+    set({ healthLoading: true, healthError: null })
+
+    try {
+      const response = await fetch(buildUrl('/api/health'))
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Health check failed')
+      }
+
+      set({ health: data, healthLoading: false })
+    } catch (error) {
+      set({
+        healthLoading: false,
+        healthError: error.message || 'Unable to reach /api/health',
+      })
+    }
+  },
+
+  sendGeminiPrompt: async () => {
+    const { prompt } = get()
+
+    if (!prompt.trim()) {
+      set({ geminiError: 'Prompt is required before sending.' })
+      return
+    }
+
+    set({ geminiLoading: true, geminiError: null })
+
+    try {
+      const response = await fetch(buildUrl('/api/gemini'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Gemini request failed')
+      }
+
+      set({ geminiResult: data, geminiLoading: false })
+    } catch (error) {
+      set({
+        geminiLoading: false,
+        geminiError: error.message || 'Unable to reach /api/gemini',
+      })
+    }
+  },
 }))

@@ -1,16 +1,66 @@
-# React + Vite
+# 0xMarket Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend application for 0xMarket.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19
+- Vite 8
+- Tailwind CSS
+- Zustand
 
-## React Compiler
+## Requirements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 18+
+- npm
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+cd client
+npm install
+```
+
+## Environment
+
+Create `client/.env` (or copy from `.env.example`):
+
+```env
+VITE_API_BASE_URL=
+VITE_ASSETS_ENDPOINT=
+```
+
+Variable behavior:
+
+| Variable | Description |
+| --- | --- |
+| `VITE_API_BASE_URL` | Base URL used for `/api/health` and `/api/gemini` requests. Leave empty in local development to use the Vite proxy. |
+| `VITE_ASSETS_ENDPOINT` | Full URL for assets request. If empty, defaults to `http://localhost:5000/api/assets`. |
+
+## Development
+
+```bash
+npm run dev
+```
+
+Default local URL: http://localhost:5173
+
+## Scripts
+
+- `npm run dev`: Start development server
+- `npm run build`: Build production assets
+- `npm run preview`: Preview production build
+- `npm run lint`: Run ESLint
+
+## API Integration
+
+State and API calls are implemented in `src/store/useMarketStore.js`:
+
+- `fetchAssets()` -> assets endpoint
+- `fetchHealth()` -> `GET /api/health`
+- `sendGeminiPrompt()` -> `POST /api/gemini`
+
+## Deployment Notes
+
+- Set `VITE_API_BASE_URL` and `VITE_ASSETS_ENDPOINT` to your deployed API URLs.
+- Ensure backend `CLIENT_ORIGIN` includes your frontend domain.

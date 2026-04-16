@@ -1,26 +1,73 @@
-#0xMarket
+# 0xMarket
 
-Welcome to the underground. This is a headless, terminal-themed digital e-commerce platform built for developers, security researchers, and vibe-coders. 
+0xMarket is a full-stack digital marketplace focused on developer-centric assets and a terminal-inspired interface.
 
-It serves as a functional marketplace for digital assets (scripts, config files, UI themes) wrapped in a cyberpunk, CLI-inspired aesthetic. 
+## Project Summary
 
-## 🛠️ The Tech Stack
-Built entirely on free, zero-maintenance tiers:
-- **Frontend:** React + Vite + Tailwind CSS (Hosted on Vercel)
-- **Backend:** Node.js + Express.js (Hosted on Render)
-- **Database:** MongoDB Atlas (Shared Cluster)
-- **State Management:** Zustand
-- **Brain:** Google Gemini API (For dynamic tool generation & chatbot features)
+The platform combines a React frontend with an Express API and MongoDB data layer. It is structured as a monorepo with isolated client and server applications, designed for iterative feature delivery.
 
-## ⚡ Core Features (The Fun Stuff)
-- **Terminal UI Checkout:** A seamless checkout experience that mimics a command-line interface.
-- **The `sudo` Discount:** A hidden global listener where typing `sudo discount` grants a secret percentage off the cart.
-- **Encrypted Reviews:** User reviews are visually encrypted using Base64/Rot13, requiring a "decrypt" interaction to read.
-- **Vibe-Mode Toggle:** Instantly switches the UI from "Corporate Clean" to "Matrix Green."
+## Core Features
 
-## 🚀 Getting Started (Codespaces)
-To run this locally or in GitHub Codespaces:
+- Marketplace asset catalog served from a persistent database
+- REST API for health status, asset retrieval, and AI route integration
+- Zustand-based client state management for data and UI actions
+- Seed pipeline for generating demo inventory quickly
+- Terminal-style interface direction for the frontend experience
 
-1. Clone the repo:
-   ```bash
-   git clone [https://github.com/yourusername/black-market.git](https://github.com/yourusername/black-market.git)
+## Current Capabilities
+
+- Asset listing from MongoDB
+- API health endpoint
+- Placeholder Gemini endpoint for prompt flow wiring
+- Client-side data loading, error handling, and request state feedback
+
+## Tech Stack
+
+- Frontend: React, Vite, Tailwind CSS, Zustand
+- Backend: Node.js, Express, Mongoose
+- Database: MongoDB
+
+## Repository Structure
+
+```text
+.
+├── client/
+│   ├── src/
+│   └── public/
+└── server/
+    ├── config/
+    ├── models/
+    ├── routes/
+    └── scripts/
+```
+
+## API Surface
+
+- `GET /api/health`
+- `GET /api/assets`
+- `POST /api/gemini` (placeholder behavior)
+
+## Product Status
+
+This project is currently under active development.
+
+Work in progress areas include:
+
+- Production-grade Gemini integration
+- Authentication and account-level ownership
+- Cart/checkout flow hardening
+- Admin workflows for asset publishing and moderation
+- Test coverage expansion across client and server
+
+## Roadmap (In Progress)
+
+- Stabilize data contracts between frontend store and backend routes
+- Add role-based access controls for management operations
+- Introduce deployment-grade observability and error monitoring
+- Improve UX polish for onboarding and asset discovery
+
+## Repository
+
+- Owner: afnan0304
+- Name: 0xMarket
+- Primary branch: main
