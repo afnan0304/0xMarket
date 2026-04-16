@@ -17,11 +17,12 @@ app.use('/api/health', healthRoute)
 app.use('/api/gemini', geminiRoute)
 
 connectDB()
-  .catch((error) => {
-    console.error('MongoDB connection failed:', error.message)
-  })
-  .finally(() => {
+  .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`)
     })
+  })
+  .catch((error) => {
+    console.error('MongoDB connection failed:', error.message)
+    process.exit(1)
   })
