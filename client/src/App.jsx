@@ -101,7 +101,9 @@ function App() {
             </button>
           </div>
 
-          {geminiResult && <p className="mt-3 text-sm">Response: {JSON.stringify(geminiResult)}</p>}
+          {geminiResult && (
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#00d136]">Response: {geminiResult}</p>
+          )}
           {geminiError && <p className="mt-3 text-sm text-red-400">Error: {geminiError}</p>}
         </form>
       </section>

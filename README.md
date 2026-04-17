@@ -18,7 +18,7 @@ The platform combines a React frontend with an Express API and MongoDB data laye
 
 - Asset listing from MongoDB
 - API health endpoint
-- Placeholder Gemini endpoint for prompt flow wiring
+- Gemini endpoint that returns an in-character Black Market Dealer reply
 - Client-side data loading, error handling, and request state feedback
 
 ## Tech Stack
@@ -45,7 +45,7 @@ The platform combines a React frontend with an Express API and MongoDB data laye
 
 - `GET /api/health`
 - `GET /api/assets`
-- `POST /api/gemini` (placeholder behavior)
+- `POST /api/gemini` (Gemini-powered Black Market Dealer reply)
 
 ## Product Status
 
@@ -53,7 +53,7 @@ This project is currently under active development.
 
 Work in progress areas include:
 
-- Production-grade Gemini integration
+- Production-grade Gemini integration with persona prompt handling
 - Authentication and account-level ownership
 - Cart/checkout flow hardening
 - Admin workflows for asset publishing and moderation

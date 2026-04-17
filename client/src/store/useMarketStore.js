@@ -70,7 +70,7 @@ export const useMarketStore = create((set, get) => ({
       return
     }
 
-    set({ geminiLoading: true, geminiError: null })
+    set({ geminiLoading: true, geminiError: null, geminiResult: null })
 
     try {
       const response = await fetch(buildUrl('/api/gemini'), {
@@ -87,7 +87,7 @@ export const useMarketStore = create((set, get) => ({
         throw new Error(data?.message || 'Gemini request failed')
       }
 
-      set({ geminiResult: data, geminiLoading: false })
+      set({ geminiResult: data?.reply || 'The dealer stays quiet. Try another signal.', geminiLoading: false })
     } catch (error) {
       set({
         geminiLoading: false,

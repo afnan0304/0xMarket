@@ -37,6 +37,8 @@ Variable behavior:
 | `VITE_API_BASE_URL` | Base URL used for `/api/health` and `/api/gemini` requests. Leave empty in local development to use the Vite proxy. |
 | `VITE_ASSETS_ENDPOINT` | Full URL for assets request. If empty, defaults to `http://localhost:5000/api/assets`. |
 
+The server also requires `GEMINI_API_KEY` in `server/.env` to answer `POST /api/gemini`.
+
 ## Development
 
 ```bash
@@ -58,7 +60,7 @@ State and API calls are implemented in `src/store/useMarketStore.js`:
 
 - `fetchAssets()` -> assets endpoint
 - `fetchHealth()` -> `GET /api/health`
-- `sendGeminiPrompt()` -> `POST /api/gemini`
+- `sendGeminiPrompt()` -> `POST /api/gemini`, stores the dealer reply text from `reply`
 
 ## Deployment Notes
 
