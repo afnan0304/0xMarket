@@ -1,12 +1,13 @@
 const express = require('express')
 const cors = require('cors')
 const dotenv = require('dotenv')
+
+dotenv.config()
+
 const connectDB = require('./config/db')
 const healthRoute = require('./routes/health')
 const geminiRoute = require('./routes/gemini')
 const assetsRoute = require('./routes/assets')
-
-dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -19,7 +20,7 @@ app.use('/api/health', healthRoute)
 app.use('/api/gemini', geminiRoute)
 app.use('/api/assets', assetsRoute)
 
-connectDB()
+connectDB({ required: true })
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`)

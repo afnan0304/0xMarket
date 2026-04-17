@@ -4,7 +4,7 @@ const connectDB = async ({ required = false } = {}) => {
   const mongoUri = process.env.MONGO_URI
 
   if (!mongoUri) {
-    const message = 'MONGO_URI is not defined. Starting server without database connection.'
+    const message = 'MONGO_URI is not defined. Add it to server/.env before starting the server.'
 
     if (required) {
       throw new Error(message)
