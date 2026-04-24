@@ -32,7 +32,8 @@ const validateEmailConfig = () => {
   }
 
   if (config.provider === 'local') {
-    throw new Error('EMAIL_PROVIDER=local is not allowed in production.')
+    console.warn('EMAIL_PROVIDER=local is running in production. Email actions will log locally instead of sending mail.')
+    return config
   }
 
   if (config.provider === 'sendgrid' && !config.sendgridApiKey) {
