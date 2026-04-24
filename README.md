@@ -1,73 +1,99 @@
 # 0xMarket
 
-0xMarket is a full-stack digital marketplace focused on developer-centric assets and a terminal-inspired interface.
+0xMarket is a monorepo marketplace app with a React frontend and an Express API.
 
-## Project Summary
+## Stack
 
-The platform combines a React frontend with an Express API and MongoDB data layer. It is structured as a monorepo with isolated client and server applications, designed for iterative feature delivery.
-
-## Core Features
-
-- Marketplace asset catalog served from a persistent database
-- REST API for health status, asset retrieval, and AI route integration
-- Zustand-based client state management for data and UI actions
-- Seed pipeline for generating demo inventory quickly
-- Terminal-style interface direction for the frontend experience
-
-## Current Capabilities
-
-- Asset listing from MongoDB
-- API health endpoint
-- Gemini endpoint that returns an in-character Black Market Dealer reply
-- Client-side data loading, error handling, and request state feedback
-
-## Tech Stack
-
-- Frontend: React, Vite, Tailwind CSS, Zustand
+- Frontend: React, Vite, Tailwind, Zustand
 - Backend: Node.js, Express, Mongoose
 - Database: MongoDB
 
-## Repository Structure
+## Monorepo Layout
 
 ```text
 .
 ├── client/
-│   ├── src/
-│   └── public/
 └── server/
-    ├── config/
-    ├── models/
-    ├── routes/
-    └── scripts/
 ```
 
-## API Surface
+## Quick Start
+
+1. Install dependencies:
+
+```bash
+npm install
+npm --prefix client install
+npm --prefix server install
+```
+
+2. Run backend:
+
+```bash
+npm run dev:server
+```
+
+3. Run frontend:
+
+```bash
+npm run dev:client
+```
+
+## Environment
+
+- Frontend template: `client/.env.example`
+- Backend template: `server/.env.example`
+
+Important server variables:
+
+- `MONGO_URI`
+- `CLIENT_ORIGIN`
+- `EMAIL_PROVIDER`, provider API key
+- `GEMINI_API_KEY`
+
+## API Highlights
 
 - `GET /api/health`
 - `GET /api/assets`
-- `POST /api/gemini` (Gemini-powered Black Market Dealer reply)
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/orders/checkout`
+- `POST /api/gemini`
 
-## Product Status
+## Local Smoke Test
 
-This project is currently under active development.
+```bash
+cd server
+npm run smoke:auth
+```
 
-Work in progress areas include:
+Optional base URL:
 
-- Production-grade Gemini integration with persona prompt handling
-- Authentication and account-level ownership
-- Cart/checkout flow hardening
-- Admin workflows for asset publishing and moderation
-- Test coverage expansion across client and server
+```bash
+SMOKE_BASE_URL=http://localhost:5000 npm run smoke:auth
+```
 
-## Roadmap (In Progress)
+## Deploy (Vercel, Single Project)
 
-- Stabilize data contracts between frontend store and backend routes
-- Add role-based access controls for management operations
-- Introduce deployment-grade observability and error monitoring
-- Improve UX polish for onboarding and asset discovery
+This repo is configured for one Vercel project using `vercel.json`.
+
+- Build command: `npm run build`
+- Output directory: `client/dist`
+- API runtime entry: `api/index.js`
+
+Routing:
+
+- `/api/*` -> backend function
+- other routes -> SPA `index.html`
+
+Recommended production env values:
+
+- `NODE_ENV=production`
+- `CLIENT_ORIGIN=https://your-domain.com`
+- `APP_BASE_URL=https://your-domain.com`
+- backend secrets from `server/.env.example`
 
 ## Repository
 
 - Owner: afnan0304
 - Name: 0xMarket
-- Primary branch: main
+- Branch: main

@@ -26,6 +26,11 @@ const assetSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    downloadUrl: {
+      type: String,
+      trim: true,
+      default: null,
+    },
   },
   {
     timestamps: true,

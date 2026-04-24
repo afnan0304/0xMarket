@@ -1,0 +1,312 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=VT323&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --terminal-bg: #000000;
+  --terminal-panel: #020a05;
+  --terminal-edge: #1f4f2f;
+  --terminal-neon: #00ff41;
+  --terminal-soft: #66c689;
+  --terminal-copy: #c8ffd9;
+  font-family: 'Fira Code', Menlo, Monaco, monospace;
+  color: var(--terminal-copy);
+  background-color: var(--terminal-bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 255, 65, 0.09), transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(31, 79, 47, 0.3), transparent 35%),
+    radial-gradient(circle at 50% 100%, rgba(0, 255, 65, 0.08), transparent 40%),
+    var(--terminal-bg);
+  color: var(--terminal-copy);
+}
+
+.cursor-block {
+  display: inline-block;
+  width: 10px;
+  height: 1em;
+  background: var(--terminal-neon);
+  animation: blink 1s steps(1, end) infinite;
+}
+
+.font-retro {
+  font-family: 'VT323', monospace;
+}
+
+.phosphor-glow {
+  color: var(--terminal-neon);
+  text-shadow:
+    0 0 6px rgba(0, 255, 65, 0.7),
+    0 0 16px rgba(0, 255, 65, 0.4);
+}
+
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 70;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 255, 65, 0.08) 3px,
+    rgba(0, 255, 65, 0.05) 4px
+  );
+  mix-blend-mode: screen;
+  opacity: 0.32;
+  animation: flicker-overlay 6s steps(12, end) infinite;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes flicker-overlay {
+  0%, 100% {
+    opacity: 0.32;
+  }
+  14% {
+    opacity: 0.35;
+  }
+  28% {
+    opacity: 0.3;
+  }
+  42% {
+    opacity: 0.34;
+  }
+  56% {
+    opacity: 0.31;
+  }
+  70% {
+    opacity: 0.33;
+  }
+  84% {
+    opacity: 0.32;
+  }
+}
+
+@keyframes glitch-jitter {
+  0% {
+    transform: translateX(0);
+    text-shadow: 0 0 0 transparent;
+  }
+  25% {
+    transform: translateX(-1px);
+    text-shadow: -2px 0 rgba(255, 30, 30, 0.8);
+  }
+  50% {
+    transform: translateX(1px);
+    text-shadow: 2px 0 rgba(0, 190, 255, 0.8);
+  }
+  75% {
+    transform: translateX(-1px);
+    text-shadow: -1px 0 rgba(0, 255, 65, 0.8);
+  }
+  100% {
+    transform: translateX(0);
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+.glitch-button:hover .glitch-text {
+  animation: glitch-jitter 160ms linear 3;
+}
+
+/* Enhanced Card Styling */
+@layer components {
+  .card {
+    @apply rounded-md border border-[#1f4f2f]/40 bg-[#020a05]/40 backdrop-blur;
+  }
+
+  .card:hover {
+    @apply border-[#1f4f2f]/60 shadow-lg shadow-[#00ff41]/10 transition-all duration-300;
+  }
+
+  /* Better Button Styling */
+  .button {
+    @apply transition-all duration-200;
+  }
+
+  .button:hover:not(:disabled) {
+    @apply shadow-md shadow-[#00ff41]/20;
+  }
+
+  .button:active:not(:disabled) {
+    @apply shadow-lg shadow-[#00ff41]/30;
+  }
+
+  /* Input Focus States */
+  input:focus, textarea:focus, select:focus {
+    @apply border-[#66c689] shadow-lg shadow-[#1f4f2f]/20;
+  }
+
+  /* Badge Styling */
+  .badge {
+    @apply text-xs font-medium tracking-wide;
+  }
+
+  /* Separator Enhancement */
+  .separator {
+    @apply bg-gradient-to-r from-[#1f4f2f]/0 via-[#1f4f2f]/40 to-[#1f4f2f]/0;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(102, 198, 137, 0.3);
+    border-radius: 4px;
+    transition: background 200ms ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 198, 137, 0.5);
+  }
+
+  /* Text Selection */
+  ::selection {
+    background-color: rgba(0, 255, 65, 0.2);
+    color: var(--terminal-neon);
+  }
+
+  /* Loading Animation */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0.6;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Status Indicator */
+  @keyframes status-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .status-pulse {
+    animation: status-pulse 2s ease-in-out infinite;
+  }
+
+  /* Smooth Transitions */
+  * {
+    @apply transition-colors duration-150;
+  }
+
+  button, a, input, textarea, select {
+    @apply transition-all duration-200;
+  }
+
+  /* Grid Card Hover Effect */
+  .card-grid-item:hover {
+    @apply translate-y-[-2px];
+  }
+
+  /* Inventory Card Enhancement */
+  .inventory-card {
+    @apply border border-[#1f4f2f]/40 bg-[#020a05]/40 hover:border-[#1f4f2f] hover:shadow-lg hover:shadow-[#00ff41]/10 hover:translate-y-[-2px] transition-all duration-300;
+  }
+
+  /* Sidebar Enhancement */
+  .sidebar-card {
+    @apply border-[#1f4f2f]/60 bg-[#020a05]/50 backdrop-blur hover:border-[#1f4f2f] transition-colors;
+  }
+
+  /* Header Enhancement */
+  .header-control {
+    @apply bg-black/40 border border-[#1f4f2f]/60 rounded px-3 py-2 hover:border-[#1f4f2f] transition-colors;
+  }
+
+  /* Form Input Enhancement */
+  .form-input {
+    @apply bg-black/40 border border-[#1f4f2f]/60 text-sm h-9 transition-colors hover:border-[#1f4f2f]/80 focus:border-[#66c689];
+  }
+
+  /* Badge Variants */
+  .badge-secondary {
+    @apply bg-[#1f4f2f]/30 text-[#9effbf] border border-[#1f4f2f]/40;
+  }
+
+  .badge-outline {
+    @apply border border-[#1f4f2f]/60 text-[#66c689] hover:bg-[#1f4f2f]/20;
+  }
+
+  /* Subtle Glow Effects */
+  .glow-green {
+    text-shadow:
+      0 0 6px rgba(0, 255, 65, 0.5),
+      0 0 12px rgba(0, 255, 65, 0.3);
+  }
+
+  .glow-text {
+    @apply text-[#00ff41] drop-shadow-[0_0_8px_rgba(0,255,65,0.6)];
+  }
+
+  /* Empty State Styling */
+  .empty-state {
+    @apply py-12 text-center text-sm text-[#66c689]/60;
+  }
+}
+
+/* Dark mode enhancements */
+@layer base {
+  /* Improve text readability */
+  html {
+    letter-spacing: 0.5px;
+  }
+
+  p, span, div {
+    letter-spacing: 0.3px;
+  }
+
+  /* Better contrast for accessibility */
+  a {
+    @apply text-[#9effbf] hover:text-[#00ff41] underline-offset-2;
+  }
+
+  /* Code blocks */
+  code {
+    @apply bg-[#1f4f2f]/30 px-2 py-1 rounded font-mono text-xs;
+  }
+
+  /* Links */
+  button:hover {
+    @apply cursor-pointer;
+  }
+}

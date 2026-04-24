@@ -14,9 +14,18 @@ const connectDB = async ({ required = false } = {}) => {
     return false
   }
 
-  await mongoose.connect(mongoUri)
-  console.log('MongoDB connected')
-  return true
+  try {
+    await mongoose.connect(mongoUri)
+    console.log('MongoDB connected')
+    return true
+  } catch (error) {
+    if (required) {
+      throw error
+    }
+
+    console.warn(`MongoDB unavailable, running in fallback mode: ${error.message}`)
+    return false
+  }
 }
 
 module.exports = connectDB

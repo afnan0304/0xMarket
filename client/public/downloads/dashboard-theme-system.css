@@ -1,0 +1,21 @@
+:root {
+  --surface: #0b0f14;
+  --surface-2: #111827;
+  --text: #d1fae5;
+  --accent: #34d399;
+  --muted: #6b7280;
+}
+
+.dashboard-shell {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.dashboard-shell .panel {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 12px;
+}

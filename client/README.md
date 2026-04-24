@@ -35,7 +35,7 @@ Variable behavior:
 | Variable | Description |
 | --- | --- |
 | `VITE_API_BASE_URL` | Base URL used for `/api/health` and `/api/gemini` requests. Leave empty in local development to use the Vite proxy. |
-| `VITE_ASSETS_ENDPOINT` | Full URL for assets request. If empty, defaults to `http://localhost:5000/api/assets`. |
+| `VITE_ASSETS_ENDPOINT` | Assets request path. Defaults to `/api/assets` for same-origin deployments. |
 
 The server also requires `GEMINI_API_KEY` in `server/.env` to answer `POST /api/gemini`.
 
@@ -61,8 +61,12 @@ State and API calls are implemented in `src/store/useMarketStore.js`:
 - `fetchAssets()` -> assets endpoint
 - `fetchHealth()` -> `GET /api/health`
 - `sendGeminiPrompt()` -> `POST /api/gemini`, stores the dealer reply text from `reply`
+- `initializeCsrf()` -> `GET /api/auth/csrf` on app startup
+- Auth lifecycle endpoints use `/api/auth/*` (`register`, `login`, `verify-email`, `request-verification`, `request-password-reset`, `reset-password`, `me`, `logout`)
+
+For protected mutations, the client reads `market_csrf` and sends `x-csrf-token` automatically.
 
 ## Deployment Notes
 
-- Set `VITE_API_BASE_URL` and `VITE_ASSETS_ENDPOINT` to your deployed API URLs.
+- For a single-domain Vercel deploy, keep `VITE_API_BASE_URL` empty and use `VITE_ASSETS_ENDPOINT=/api/assets`.
 - Ensure backend `CLIENT_ORIGIN` includes your frontend domain.

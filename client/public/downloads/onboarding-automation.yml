@@ -1,0 +1,10 @@
+workflow:
+  name: onboarding-automation
+  steps:
+    - create_identity
+    - provision_tools
+    - assign_access
+    - notify_team
+  defaults:
+    role: contributor
+    status: active
