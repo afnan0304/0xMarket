@@ -2,12 +2,13 @@ const mongoose = require('mongoose')
 
 const orderSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      index: true,
     },
-    assets: [
+    items: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Asset',
@@ -16,10 +17,10 @@ const orderSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ['Pending', 'Completed'],
+      enum: ['Pending', 'Completed', 'Cancelled'],
       default: 'Pending',
     },
-    totalBtc: {
+    totalSpent: {
       type: Number,
       required: true,
       min: 0,
@@ -55,5 +56,23 @@ const orderSchema = new mongoose.Schema(
     timestamps: true,
   },
 )
+
+const userVirtual = orderSchema.virtual('user')
+userVirtual.get(function userGetter() {
+  return this.userId
+})
+
+const assetsVirtual = orderSchema.virtual('assets')
+assetsVirtual.get(function assetsGetter() {
+  return this.items
+})
+
+const totalBtcVirtual = orderSchema.virtual('totalBtc')
+totalBtcVirtual.get(function totalBtcGetter() {
+  return this.totalSpent
+})
+
+orderSchema.set('toJSON', { virtuals: true })
+orderSchema.set('toObject', { virtuals: true })
 
 module.exports = mongoose.model('Order', orderSchema)

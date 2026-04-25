@@ -79,7 +79,6 @@ function App() {
   const [activeBucket, setActiveBucket] = useState('all')
   const [searchValue, setSearchValue] = useState('')
   const [focusedAsset, setFocusedAsset] = useState(null)
-  const [cartAssetIds, setCartAssetIds] = useState([])
   const [checkoutData, setCheckoutData] = useState(initialCheckoutData)
   const [checkoutErrors, setCheckoutErrors] = useState({})
   const [authMode, setAuthMode] = useState('login')
@@ -98,6 +97,8 @@ function App() {
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [uiNotice, setUiNotice] = useState(null)
   const [recentSettlements, setRecentSettlements] = useState([])
+  const [sudoBuffer, setSudoBuffer] = useState('')
+  const [sudoMode, setSudoMode] = useState(false)
 
   const assets = useMarketStore((state) => state.assets)
   const assetsSource = useMarketStore((state) => state.assetsSource)
@@ -105,6 +106,13 @@ function App() {
   const assetsLoading = useMarketStore((state) => state.assetsLoading)
   const assetsError = useMarketStore((state) => state.assetsError)
   const fetchAssets = useMarketStore((state) => state.fetchAssets)
+  const cartAssetIds = useMarketStore((state) => state.cartAssetIds)
+  const cartDiscountCode = useMarketStore((state) => state.cartDiscountCode)
+  const cartDiscountPercent = useMarketStore((state) => state.cartDiscountPercent)
+  const addToCart = useMarketStore((state) => state.addToCart)
+  const removeFromCart = useMarketStore((state) => state.removeFromCart)
+  const clearCart = useMarketStore((state) => state.clearCart)
+  const applyCartDiscount = useMarketStore((state) => state.applyCartDiscount)
   const health = useMarketStore((state) => state.health)
   const healthLoading = useMarketStore((state) => state.healthLoading)
   const healthError = useMarketStore((state) => state.healthError)
@@ -167,14 +175,18 @@ function App() {
   }, [assets, cartAssetIds])
 
   const ownedAssetIds = useMemo(() => {
-    return new Set((authUser?.purchasedAssets || []).map((assetId) => String(assetId)))
+    return new Set((authUser?.ownedAssets || authUser?.purchasedAssets || []).map((assetId) => String(assetId)))
   }, [authUser])
 
-  const cartTotalBtc = useMemo(() => {
+  const cartSubtotalBtc = useMemo(() => {
     return cartItems.reduce((sum, asset) => {
       return sum + Number(asset.btcPrice)
     }, 0)
   }, [cartItems])
+
+  const cartTotalBtc = useMemo(() => {
+    return Number((cartSubtotalBtc * (1 - cartDiscountPercent / 100)).toFixed(8))
+  }, [cartDiscountPercent, cartSubtotalBtc])
 
   const authStateLabel = authUser
     ? 'Authenticated'
@@ -183,7 +195,7 @@ function App() {
       : 'Guest Session'
   const assetCountLabel = `${assets.length} assets`
   const cartCountLabel = `${cartAssetIds.length} queued`
-  const ownedCountLabel = `${authUser?.purchasedAssets?.length || 0} owned`
+  const ownedCountLabel = `${authUser?.ownedAssets?.length || authUser?.purchasedAssets?.length || 0} owned`
   const categoryCountLabel = `${availableCategories.length} categories`
   const resendCooldownSeconds = lastVerificationResendAt
     ? Math.max(0, 60 - Math.floor((nowMs - lastVerificationResendAt) / 1000))
@@ -196,19 +208,18 @@ function App() {
   }
 
   const handleAddToCart = (assetId) => {
-    setCartAssetIds((current) => {
-      if (current.includes(assetId)) {
-        setUiNotice({ tone: 'warning', message: 'Asset already queued in checkout.' })
-        return current
-      }
+    const didAdd = addToCart(assetId)
 
+    if (didAdd) {
       setUiNotice({ tone: 'success', message: 'Asset queued for settlement.' })
-      return [...current, assetId]
-    })
+      return
+    }
+
+    setUiNotice({ tone: 'warning', message: 'Asset already queued in checkout.' })
   }
 
   const handleRemoveFromCart = (assetId) => {
-    setCartAssetIds((current) => current.filter((id) => id !== assetId))
+    removeFromCart(assetId)
   }
 
   const handleDownloadAsset = async (assetId) => {
@@ -230,8 +241,14 @@ function App() {
   }
 
   const handleClearCart = () => {
-    setCartAssetIds([])
+    clearCart()
     clearCheckoutResult()
+    setSudoMode(false)
+    setSudoBuffer('')
+    setCheckoutData((current) => ({
+      ...initialCheckoutData,
+      paymentRail: current.paymentRail,
+    }))
   }
 
   const validateCheckout = () => {
@@ -309,7 +326,7 @@ function App() {
 
     const result = await checkout({
       assetIds: cartAssetIds,
-      discountCode: checkoutData.promo.trim(),
+      discountCode: checkoutData.promo.trim() || cartDiscountCode || '',
       paymentRail: checkoutData.paymentRail,
       alias: checkoutData.alias.trim(),
       wallet: checkoutData.wallet.trim(),
@@ -336,7 +353,9 @@ function App() {
 
         return next.slice(0, 5)
       })
-      setCartAssetIds([])
+      clearCart()
+      setSudoMode(false)
+      setSudoBuffer('')
       setCheckoutData((current) => ({
         ...initialCheckoutData,
         paymentRail: current.paymentRail,
@@ -504,10 +523,48 @@ function App() {
     }
   }, [authResetToken])
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) {
+        return
+      }
+
+      if (event.repeat) {
+        return
+      }
+
+      const key = event.key.length === 1 ? event.key.toLowerCase() : ''
+
+      if (!key) {
+        return
+      }
+
+      setSudoBuffer((current) => {
+        const next = `${current}${key}`.slice(-4)
+
+        if (next === 'sudo') {
+          setSudoMode(true)
+          applyCartDiscount({ code: 'SUDO', percent: 10 })
+          setCheckoutData((currentData) => ({
+            ...currentData,
+            promo: 'SUDO',
+          }))
+          setUiNotice({ tone: 'warning', message: 'SUDO detected. 10% cart discount armed.' })
+          return ''
+        }
+
+        return next
+      })
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [applyCartDiscount])
+
   const sourceLabel = assetsSource ? assetsSource.replace('-', ' ') : 'unknown'
 
   return (
-    <div className="retro-panel content-shell relative min-h-dvh bg-black text-[#c8ffd9]">
+    <div className={`retro-panel content-shell relative min-h-dvh bg-black text-[#c8ffd9] ${sudoMode ? 'sudo-glitch' : ''}`}>
       <div className="crt-overlay" aria-hidden="true" />
 
       <div className="terminal-grid grid min-h-dvh grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -779,6 +836,18 @@ function App() {
                 <span className="text-[#66c689]">Queued</span>
                 <span className="text-[#9effbf]">{cartAssetIds.length} item(s)</span>
               </div>
+              <div className="mt-1.5 flex items-center justify-between text-xs">
+                <span className="text-[#66c689]">Subtotal</span>
+                <span className="text-[#9effbf]">{cartSubtotalBtc.toFixed(2)} BTC</span>
+              </div>
+              {cartDiscountPercent > 0 && (
+                <div className="mt-1.5 flex items-center justify-between text-xs">
+                  <span className="text-[#66c689]">Discount</span>
+                  <span className="text-amber-300">
+                    {cartDiscountCode || 'SUDO'} -{cartDiscountPercent}%
+                  </span>
+                </div>
+              )}
               <div className="mt-1.5 flex items-center justify-between text-xs">
                 <span className="text-[#66c689]">Total</span>
                 <span className="phosphor-glow">{cartTotalBtc.toFixed(2)} BTC</span>

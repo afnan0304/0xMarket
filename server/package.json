@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "seed": "node scripts/seedAssets.js",
+    "seed": "node seed.js",
     "smoke:auth": "node scripts/authSmokeTest.js"
   },
   "keywords": [],

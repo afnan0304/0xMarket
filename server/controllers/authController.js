@@ -5,6 +5,7 @@ const {
   PASSWORD_RESET_TOKEN_TTL_MS,
   SESSION_TTL_MS,
   VERIFICATION_TOKEN_TTL_MS,
+  createAuthToken,
   clearAuthCookies,
   generateToken,
   hashToken,
@@ -27,14 +28,16 @@ const sanitizeUser = (user) => ({
   id: user._id,
   username: user.username,
   email: user.email,
-  purchasedAssets: user.purchasedAssets || [],
+  role: user.role || 'buyer',
+  ownedAssets: user.ownedAssets || [],
+  purchasedAssets: user.ownedAssets || [],
   isVerified: Boolean(user.isVerified),
   lastLoginAt: user.lastLoginAt || null,
   lockedUntil: user.lockedUntil || null,
 })
 
 const buildSessionResponse = async (res, user, sessionContext = {}) => {
-  const sessionToken = generateToken(48)
+  const sessionToken = createAuthToken(user)
   const csrfToken = generateToken(32)
   const now = new Date()
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS)
@@ -106,6 +109,7 @@ const register = async (req, res, next) => {
       username,
       email,
       password: passwordHash,
+      role: 'buyer',
       isVerified: false,
       verificationTokenHash: hashToken(verificationToken),
       verificationTokenExpiresAt,

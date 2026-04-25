@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '')
 const ASSETS_PATH = import.meta.env.VITE_ASSETS_ENDPOINT || '/api/assets'
 const CSRF_COOKIE_NAME = 'market_csrf'
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -90,6 +90,9 @@ export const useMarketStore = create((set, get) => ({
   assetsMessage: null,
   assetsLoading: false,
   assetsError: null,
+  cartAssetIds: [],
+  cartDiscountCode: null,
+  cartDiscountPercent: 0,
   health: null,
   healthLoading: false,
   healthError: null,
@@ -112,6 +115,52 @@ export const useMarketStore = create((set, get) => ({
   setPrompt: (prompt) => set({ prompt }),
   clearCheckoutResult: () => set({ checkoutResult: null, checkoutError: null }),
   clearAuthError: () => set({ authError: null }),
+  addToCart: (assetId) => {
+    const normalizedAssetId = String(assetId || '').trim()
+
+    if (!normalizedAssetId) {
+      return false
+    }
+
+    if (get().cartAssetIds.includes(normalizedAssetId)) {
+      return false
+    }
+
+    set((state) => ({
+      cartAssetIds: [...state.cartAssetIds, normalizedAssetId],
+    }))
+
+    return true
+  },
+  removeFromCart: (assetId) => {
+    const normalizedAssetId = String(assetId || '').trim()
+    set((state) => ({
+      cartAssetIds: state.cartAssetIds.filter((id) => id !== normalizedAssetId),
+    }))
+  },
+  clearCart: () => set({ cartAssetIds: [], cartDiscountCode: null, cartDiscountPercent: 0 }),
+  applyCartDiscount: ({ code, percent }) => {
+    const normalizedCode = String(code || '').trim().toUpperCase()
+    const normalizedPercent = Math.max(0, Math.min(100, Number(percent) || 0))
+
+    set({
+      cartDiscountCode: normalizedCode || null,
+      cartDiscountPercent: normalizedPercent,
+    })
+
+    return { code: normalizedCode || null, percent: normalizedPercent }
+  },
+  clearCartDiscount: () => set({ cartDiscountCode: null, cartDiscountPercent: 0 }),
+  getCartTotalBtc: () => {
+    const { assets, cartAssetIds, cartDiscountPercent } = get()
+
+    const subtotal = cartAssetIds.reduce((sum, assetId) => {
+      const asset = assets.find((item) => String(item._id) === String(assetId))
+      return sum + Number(asset?.btcPrice || 0)
+    }, 0)
+
+    return Number((subtotal * (1 - cartDiscountPercent / 100)).toFixed(8))
+  },
 
   initializeCsrf: async () => {
     try {
@@ -126,10 +175,11 @@ export const useMarketStore = create((set, get) => ({
 
     try {
       const data = await apiRequest(ASSETS_PATH, { method: 'GET' })
+      const assets = Array.isArray(data) ? data : Array.isArray(data?.assets) ? data.assets : []
 
       set({
-        assets: Array.isArray(data?.assets) ? data.assets : [],
-        assetsSource: data?.source || null,
+        assets,
+        assetsSource: data?.source || (Array.isArray(data) ? 'database' : null),
         assetsMessage: data?.message || null,
         assetsLoading: false,
       })
@@ -408,11 +458,12 @@ export const useMarketStore = create((set, get) => ({
     set({ checkoutLoading: true, checkoutError: null, checkoutResult: null })
 
     try {
-      const data = await apiRequest('/api/orders/checkout', {
+      const resolvedAssetIds = Array.isArray(assetIds) ? assetIds : get().cartAssetIds
+      const data = await apiRequest('/api/checkout', {
         method: 'POST',
         requireCsrf: true,
         body: JSON.stringify({
-          assetIds,
+          assetIds: resolvedAssetIds,
           discountCode,
           paymentRail,
           alias,
@@ -430,7 +481,12 @@ export const useMarketStore = create((set, get) => ({
         authUser: state.authUser
           ? {
               ...state.authUser,
-              purchasedAssets: Array.from(new Set([...(state.authUser.purchasedAssets || []), ...purchasedAssetIds])),
+              ownedAssets: Array.from(
+                new Set([...(state.authUser.ownedAssets || state.authUser.purchasedAssets || []), ...purchasedAssetIds]),
+              ),
+              purchasedAssets: Array.from(
+                new Set([...(state.authUser.ownedAssets || state.authUser.purchasedAssets || []), ...purchasedAssetIds]),
+              ),
             }
           : state.authUser,
       }))

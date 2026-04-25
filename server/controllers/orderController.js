@@ -4,7 +4,7 @@ const Order = require('../models/Order')
 const User = require('../models/User')
 
 const parseDiscountCodes = () => {
-  const rawCodes = process.env.SECRET_DISCOUNT_CODES || 'NULLBYTE:15,BLACKICE:25'
+  const rawCodes = process.env.SECRET_DISCOUNT_CODES || 'NULLBYTE:15,BLACKICE:25,SUDO:10'
 
   return rawCodes
     .split(',')
@@ -63,13 +63,13 @@ const checkout = async (req, res, next) => {
     const normalizedCode = typeof discountCode === 'string' ? discountCode.trim().toUpperCase() : ''
     const discountPercent = normalizedCode ? discountMap[normalizedCode] || 0 : 0
 
-    const totalBtc = Number((subtotal * (1 - discountPercent / 100)).toFixed(8))
+    const totalSpent = Number((subtotal * (1 - discountPercent / 100)).toFixed(8))
 
     const order = await Order.create({
-      user: userId,
-      assets: assets.map((asset) => asset._id),
+      userId,
+      items: assets.map((asset) => asset._id),
       status: 'Pending',
-      totalBtc,
+      totalSpent,
       discountCode: normalizedCode || null,
       discountPercent,
       paymentRail: paymentRail || null,
@@ -82,7 +82,7 @@ const checkout = async (req, res, next) => {
 
     await User.findByIdAndUpdate(userId, {
       $addToSet: {
-        purchasedAssets: {
+        ownedAssets: {
           $each: assets.map((asset) => asset._id),
         },
       },
@@ -93,7 +93,8 @@ const checkout = async (req, res, next) => {
       order: {
         id: order._id,
         status: order.status,
-        totalBtc,
+        totalBtc: totalSpent,
+        totalSpent,
         discountPercent,
       },
       purchasedAssets: assets.map((asset) => ({

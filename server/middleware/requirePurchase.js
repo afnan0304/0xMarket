@@ -15,13 +15,13 @@ const requirePurchase = async (req, res, next) => {
       return res.status(401).json({ message: 'Authentication required.' })
     }
 
-    const user = await User.findById(userId).select('purchasedAssets')
+    const user = await User.findById(userId).select('ownedAssets')
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' })
     }
 
-    const ownsAsset = user.purchasedAssets.some((ownedAssetId) => ownedAssetId.equals(assetId))
+    const ownsAsset = user.ownedAssets.some((ownedAssetId) => ownedAssetId.equals(assetId))
 
     if (!ownsAsset) {
       return res.status(403).json({ message: 'Purchase required before download.' })

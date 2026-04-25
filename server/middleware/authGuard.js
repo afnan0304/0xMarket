@@ -1,5 +1,5 @@
 const Session = require('../models/Session')
-const { SESSION_COOKIE_NAME, clearAuthCookies, hashToken } = require('../lib/authSession')
+const { SESSION_COOKIE_NAME, clearAuthCookies, hashToken, verifyAuthToken } = require('../lib/authSession')
 
 const authGuard = async (req, res, next) => {
   const token = req.cookies?.[SESSION_COOKIE_NAME]
@@ -9,13 +9,26 @@ const authGuard = async (req, res, next) => {
   }
 
   try {
+    let decodedToken = null
+
+    try {
+      decodedToken = verifyAuthToken(token)
+    } catch (_error) {
+      decodedToken = null
+    }
+
     const session = await Session.findOne({
       sessionTokenHash: hashToken(token),
       revokedAt: null,
       expiresAt: { $gt: new Date() },
-    }).populate('user', 'username email purchasedAssets isVerified lockedUntil lastLoginAt')
+    }).populate('user', 'username email ownedAssets role isVerified lockedUntil lastLoginAt')
 
     if (!session || !session.user) {
+      clearAuthCookies(res)
+      return res.status(401).json({ message: 'Authentication required.' })
+    }
+
+    if (decodedToken?.sub && String(decodedToken.sub) !== String(session.user._id)) {
       clearAuthCookies(res)
       return res.status(401).json({ message: 'Authentication required.' })
     }
@@ -29,7 +42,9 @@ const authGuard = async (req, res, next) => {
       _id: session.user._id,
       username: session.user.username,
       email: session.user.email,
-      purchasedAssets: session.user.purchasedAssets || [],
+      role: session.user.role || 'buyer',
+      ownedAssets: session.user.ownedAssets || [],
+      purchasedAssets: session.user.ownedAssets || [],
       isVerified: Boolean(session.user.isVerified),
       lastLoginAt: session.user.lastLoginAt || null,
       lockedUntil: session.user.lockedUntil || null,

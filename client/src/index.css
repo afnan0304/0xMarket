@@ -168,6 +168,29 @@ body::after {
   animation: glitch-jitter 160ms linear 3;
 }
 
+.sudo-glitch {
+  filter: hue-rotate(14deg) saturate(1.18) contrast(1.04);
+  animation: sudo-glitch-jolt 280ms steps(2, end) 1;
+}
+
+.sudo-glitch .crt-overlay {
+  opacity: 0.52;
+  animation-duration: 1.8s;
+}
+
+.sudo-glitch .terminal-panel,
+.sudo-glitch .retro-panel::before,
+.sudo-glitch .content-shell {
+  animation: sudo-scanline 1.4s linear infinite;
+}
+
+.sudo-glitch .phosphor-glow {
+  text-shadow:
+    0 0 10px rgba(0, 255, 65, 0.92),
+    2px 0 rgba(255, 92, 92, 0.45),
+    -2px 0 rgba(110, 210, 255, 0.45);
+}
+
 .glitch-button {
   transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
@@ -340,6 +363,36 @@ body::after {
   100% {
     transform: translateX(0);
     text-shadow: 0 0 0 transparent;
+  }
+}
+
+@keyframes sudo-glitch-jolt {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-1px, 0, 0) skewX(-0.5deg);
+  }
+  50% {
+    transform: translate3d(1px, -1px, 0) skewX(0.5deg);
+  }
+  75% {
+    transform: translate3d(-1px, 1px, 0) skewX(-0.25deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes sudo-scanline {
+  0% {
+    filter: none;
+  }
+  50% {
+    filter: saturate(1.14) brightness(1.04);
+  }
+  100% {
+    filter: none;
   }
 }
 

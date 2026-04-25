@@ -1,28 +1,21 @@
 const mongoose = require('mongoose')
 const Asset = require('../models/Asset')
-const fallbackAssets = require('../data/fallbackAssets')
 
 const getAssets = async (_req, res, next) => {
   if (mongoose.connection.readyState !== 1) {
-    return res.status(200).json({
-      assets: fallbackAssets,
-      source: 'fallback',
-      message: 'Database is not connected. Showing fallback inventory.',
+    return res.status(503).json({
+      message: 'Database connection unavailable.',
     })
   }
 
   try {
-    const assets = await Asset.find({}).sort({ createdAt: -1 })
+    const assets = await Asset.find({}).sort({ createdAt: -1 }).lean()
 
-    if (assets.length === 0) {
-      return res.status(200).json({
-        assets: fallbackAssets,
-        source: 'fallback-empty',
-        message: 'No assets in database. Showing fallback inventory.',
-      })
-    }
-
-    return res.status(200).json({ assets, source: 'database' })
+    return res.status(200).json({
+      assets,
+      source: 'database',
+      message: assets.length === 0 ? 'No inventory found in the vault.' : undefined,
+    })
   } catch (error) {
     return next(error)
   }
