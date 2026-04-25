@@ -3,7 +3,6 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
 const cookieParser = require('cookie-parser')
-const mongoSanitize = require('express-mongo-sanitize')
 
 dotenv.config()
 
@@ -42,7 +41,40 @@ app.use(
 app.use(express.json())
 app.use(cookieParser())
 
-app.use(mongoSanitize())
+const sanitizeNoSqlKeys = (value) => {
+  if (!value || typeof value !== 'object') {
+    return
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      sanitizeNoSqlKeys(item)
+    }
+    return
+  }
+
+  for (const key of Object.keys(value)) {
+    const currentValue = value[key]
+    sanitizeNoSqlKeys(currentValue)
+
+    if (!key.includes('$') && !key.includes('.')) {
+      continue
+    }
+
+    const safeKey = key.replace(/\$/g, '').replace(/\./g, '_')
+    if (safeKey && !(safeKey in value)) {
+      value[safeKey] = currentValue
+    }
+    delete value[key]
+  }
+}
+
+app.use((req, _res, next) => {
+  sanitizeNoSqlKeys(req.body)
+  sanitizeNoSqlKeys(req.params)
+  sanitizeNoSqlKeys(req.query)
+  next()
+})
 
 app.use('/api/health', healthRoute)
 app.use('/api/auth', authRoute)

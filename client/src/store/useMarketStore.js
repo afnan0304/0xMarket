@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 const ASSETS_PATH = import.meta.env.VITE_ASSETS_ENDPOINT || '/api/assets'
 const CSRF_COOKIE_NAME = 'market_csrf'
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
