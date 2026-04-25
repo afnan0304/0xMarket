@@ -74,16 +74,18 @@ SMOKE_BASE_URL=http://localhost:5000 npm run smoke:auth
 
 ## Deploy (Vercel, Single Project)
 
-This repo is configured for one Vercel project using `vercel.json`.
+This repo is configured for one Vercel project using the root `vercel.json`.
 
-- Build command: `npm run build`
-- Output directory: `client/dist`
-- API runtime entry: `api/index.js`
+- Framework preset: `Other`
+- Root directory: `./`
+- Add `MONGO_URI` and `GEMINI_API_KEY` in Vercel
 
 Routing:
 
-- `/api/*` -> backend function
-- other routes -> SPA `index.html`
+- `/api/*` -> `server/server.js`
+- other routes -> `client/$1`
+
+Client API calls should stay relative, for example `fetch('/api/gemini')`.
 
 Recommended production env values:
 

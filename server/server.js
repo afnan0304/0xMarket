@@ -85,33 +85,14 @@ app.use('/api', ordersRoute)
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-const startupPromise = connectDB({ required: false }).then((connected) => {
-  validateEmailConfig()
+connectDB({ required: true })
+  .then(() => {
+    validateEmailConfig()
 
-  if (!connected) {
-    console.warn('Server started without MongoDB. Asset API will return fallback inventory until DB connects.')
-  }
-})
-
-if (process.env.VERCEL) {
-  module.exports = async (req, res) => {
-    try {
-      await startupPromise
-      return app(req, res)
-    } catch (error) {
-      console.error('Server bootstrap failed:', error.message)
-      return res.status(500).json({ message: 'Server bootstrap failed.' })
+    if (process.env.NODE_ENV !== 'production') {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
     }
-  }
-} else {
-  startupPromise
-    .then(() => {
-      app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`)
-      })
-    })
-    .catch((error) => {
-      console.error('Server bootstrap failed:', error.message)
-      process.exit(1)
-    })
-}
+  })
+  .catch((error) => console.log(error))
+
+module.exports = app
