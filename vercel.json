@@ -17,14 +17,7 @@
     {
       "source": "/api/(.*)",
       "destination": "/server/server.js"
-    },
-    {
-      "source": "/(.*)\\.(css|js|png|jpg|jpeg|svg|ico|json|woff|woff2)$",
-      "destination": "/client/dist/$1.$2"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/client/dist/index.html"
     }
   ]
+
 }
