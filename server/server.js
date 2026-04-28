@@ -3,6 +3,8 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
 const cookieParser = require('cookie-parser')
+const path = require('path')
+const fs = require('fs')
 
 dotenv.config()
 
@@ -81,6 +83,23 @@ app.use('/api/auth', authRoute)
 app.use('/api/gemini', geminiRoute)
 app.use('/api', assetsRoute)
 app.use('/api', ordersRoute)
+
+// Serve static files from client build
+const clientDistPath = path.join(__dirname, '../client/dist')
+app.use(express.static(clientDistPath, {
+  maxAge: '1d',
+  etag: false,
+}))
+
+// SPA fallback: serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  const indexPath = path.join(clientDistPath, 'index.html')
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath)
+  } else {
+    res.status(404).json({ error: 'Client build not found' })
+  }
+})
 
 app.use(notFoundHandler)
 app.use(errorHandler)
