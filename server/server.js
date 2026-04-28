@@ -92,14 +92,14 @@ app.use(express.static(clientDistPath, {
 }))
 
 // SPA fallback: serve index.html for all non-API routes
-app.get('/(.*)', (req, res) => {
-  const indexPath = path.join(clientDistPath, 'index.html')
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath)
-  } else {
-    res.status(404).json({ error: 'Client build not found' })
-  }
-})
+//app.get('/(.*)', (req, res) => {
+// const indexPath = path.join(clientDistPath, 'index.html')
+//  if (fs.existsSync(indexPath)) {
+//    res.sendFile(indexPath)
+//  } else {
+//    res.status(404).json({ error: 'Client build not found' })
+//  }
+//})
 
 app.use(notFoundHandler)
 app.use(errorHandler)
